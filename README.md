@@ -1,5 +1,7 @@
 # What the SBA 7(a) loan file can and cannot tell you
 
+[![tests](https://github.com/matthewgg22/SBA/actions/workflows/test.yml/badge.svg)](https://github.com/matthewgg22/SBA/actions/workflows/test.yml)
+
 `BankName` is not the originating lender.
 
 SBA's own data dictionary defines it as the bank the loan is *currently assigned to*.[^dd] So every
@@ -55,7 +57,7 @@ Trap 3 cost me a real finding: my filter encoded only the later vocabulary and s
 
 ```bash
 pip install -r requirements.txt
-make test     # 22 tests re-deriving every tagged claim      (~15s)
+make test     # 24 tests re-deriving every tagged claim      (~15s)
 make quick    # ranking, incidence, break-even               (~45s)
 make fast     # the above plus trap 1's three backfits       (~6 min)
 make all      # re-download the FOIA extracts and rebuild from raw

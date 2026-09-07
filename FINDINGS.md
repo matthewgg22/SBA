@@ -17,28 +17,32 @@ Each candidate variable is scored by how much it improves a Brier score against 
 (200 draws), so that a variable with many small cells cannot win by chopping the data finely. The
 permutation null matches the closed-form null `(K−1)/N · p̄(1−p̄)` on every factor.
 
-| factor | what it is | excess ×1000 | cells |
-|---|---|---|---|
-| `term_b` | loan structure | **5.360** | 5 |
-| `BankName` | *current holder* — see trap 1 | 3.155 | 875 |
-| `ext_cell` | sector × vintage × state | 1.146 | 3,484 |
-| `proc` | lender channel | 0.381 | |
-| `BorrState` | geography | 0.356 | |
-| `age` | firm age | 0.225 | |
-| `sector` | industry | 0.200 | |
-| `size_b` | loan size band | 0.179 | |
-| `ApprovalFY` | macro vintage | 0.177 | |
-| `jobs_b` | jobs supported | 0.040 | |
+| factor | what it is | excess ×1000 | cells | % of variance |
+|---|---|---|---|---|
+| `term_b` | loan structure | **5.360** | 5 | **7.31** |
+| `BankName` | *current holder* — see trap 1 | 3.155 | 875 | 4.29 |
+| `ext_cell` | sector × vintage × state | 1.146 | 3,484 | **1.53** |
+| `proc` | lender channel | 0.381 | 20 | 0.52 |
+| `BorrState` | geography | 0.356 | 54 | 0.49 |
+| `age` | firm age | 0.225 | 9 | 0.31 |
+| `sector` | industry | 0.200 | 20 | 0.27 |
+| `size_b` | loan size band | 0.179 | 5 | 0.24 |
+| `ApprovalFY` | macro vintage | 0.177 | 10 | 0.24 |
+| `jobs_b` | jobs supported | 0.040 | 6 | 0.05 |
 
-Against a base rate of 9.24%, total outcome variance is `p̄(1−p̄)` = 0.0839. So:
+The base charge-off rate on the 428,874 resolved loans is **7.96%** `[C1]`, so total outcome
+variance is `p̄(1−p̄)` = 0.0733. The last column divides each excess by that variance, computed on
+the loans each factor actually scores — cells below n=30 are dropped by `resolution()`, so for
+`ext_cell` the denominator is the retained-loan rate of 8.13% rather than the population 7.96%.
+`src/ranking.py` emits this column directly, so it cannot drift from the prose. So:
 
-- the strongest **external** classifier — sector × vintage × state, 3,484 cells — removes **1.37%**
-  of outcome variance. Roughly **98.6% of the variation in whether a small business fails sits
-  *within* a narrowly defined industry, year, and state cell.**
-- firm age removes **0.27%**. Jobs supported is near zero.
-- what the file *does* predict is loan **structure**: the term band alone removes 6.4%, more than
-  every firm characteristic combined. That is a fact about how loans are written, not about which
-  businesses survive.
+- the strongest **external** classifier — sector × vintage × state, 3,484 cells — removes **1.53%**
+  of outcome variance `[C4]`. Roughly **98.5% of the variation in whether a small business fails
+  sits *within* a narrowly defined industry, year, and state cell.**
+- firm age removes **0.31%**. Jobs supported is near zero, at 0.05%.
+- what the file *does* predict is loan **structure**: the term band alone removes **7.31%**, more
+  than every firm characteristic combined (age + size + jobs = 0.60%). That is a fact about how
+  loans are written, not about which businesses survive.
 
 The government guarantees these loans, has published this file for over a decade, and records
 neither why a business failed nor a stable identifier for who lent the money.

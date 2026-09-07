@@ -117,11 +117,34 @@ def test_B_breakeven_is_low_and_insensitive_to_the_tax_assumption():
 
 # ---------------------------------------------------------------- ranking
 @need
+def test_C1_the_scored_population_is_all_resolved_loans_at_796(old):
+    """The denominator bug this test exists to prevent: FINDINGS quoted variance
+    shares normalised by 9.24%, the greenfield <$150K rate, while ranking.py
+    scores ALL resolved loans at 7.96%. Pin the population and its base rate."""
+    from src.ranking import prep
+    d = prep(old)
+    assert len(d) == 428_874
+    assert abs(d.y.mean() - 0.0796) < 0.0005
+
+
+@need
 @slow
 def test_ranking_puts_loan_structure_first_and_firm_traits_last(old):
     from src.ranking import run, prep
-    t = run(prep(old), draws=40, seed=7).set_index("factor")["excess"]
+    r = run(prep(old), draws=40, seed=7).set_index("factor")
+    t = r["excess"]
     assert t.idxmax() == "term_b"
     assert t["ext_cell"] > t["sector"], "sector-vintage-state cell beats sector alone"
     for weak in ["age", "size_b", "jobs_b"]:
         assert t[weak] < t["ext_cell"]
+
+    # Pin the MAGNITUDES quoted in FINDINGS.md, not just the ordering.
+    v = r["variance_share"]
+    assert abs(v["ext_cell"] - 0.0153) < 0.0010, f"ext_cell share {v['ext_cell']:.4f}"
+    assert abs(v["term_b"]   - 0.0731) < 0.0015, f"term_b share {v['term_b']:.4f}"
+    assert abs(v["age"]      - 0.0031) < 0.0008, f"age share {v['age']:.4f}"
+    # loan structure beats every firm characteristic combined
+    assert v["term_b"] > v["age"] + v["size_b"] + v["jobs_b"]
+    # the denominator must come from the loans each factor actually scores
+    assert abs(r.loc["ext_cell", "retained_pbar"] - 0.0813) < 0.0005
+    assert abs(r.loc["term_b",   "retained_pbar"] - 0.0796) < 0.0005

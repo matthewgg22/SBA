@@ -42,8 +42,9 @@ Trap 3 cost me a real finding: my filter encoded only the later vocabulary and s
 [`FINDINGS.md`](FINDINGS.md) states each result with the tag that reproduces it. The short version:
 
 - **Nothing in this file explains business failure.** The strongest external classifier
-  (sector × vintage × state, 3,484 cells) removes **1.4%** of outcome variance. Firm age removes
-  0.3%. Loan *structure* — the term band — beats every firm characteristic combined.
+  (sector × vintage × state, 3,484 cells) removes **1.5%** of outcome variance — so 98.5% of the
+  variation sits *within* a narrow industry-year-state cell. Firm age removes 0.3%. Loan
+  *structure* — the term band, at 7.3% — beats every firm characteristic combined.
 - The federal government guarantees these loans, publishes this file, and records neither why a
   business failed nor a stable identifier for who lent the money.
 - A programme aimed at reducing failures would need to cut them by **3.3–4.3%** to pay for itself

@@ -1,4 +1,4 @@
-# sba-7a — what the SBA 7(a) loan file can and cannot tell you
+# What the SBA 7(a) loan file can and cannot tell you
 
 `BankName` is not the originating lender.
 

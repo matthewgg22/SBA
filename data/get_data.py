@@ -2,14 +2,19 @@
 import hashlib, os, sys, urllib.request
 
 BASE = "https://data.sba.gov/sites/default/files/uploaded_resources/"
+# Data dictionary (defines BankName as the CURRENT ASSIGNEE - see traps/01-bankname.md):
+# https://data.sba.gov/sites/default/files/uploaded_resources/7a_504_foia_data_dictionary.xlsx
+# NOTE: SBA publishes only the CURRENT as-of snapshot of each coverage period. Earlier as-of
+# dates (e.g. asof_250630, asof_251231) return 404. That is precisely why the BankName
+# reassignment rate cannot be measured from the public files - see README "Honest limitations".
 FILES = {
     "7a_fy2010_2019.csv": "FOIA_7a_FY2010_FY2019_asof_260630.csv",
     "7a_fy2020_present.csv": "FOIA_7a_FY2020_Present_asof_260630.csv",
 }
 # SHA-256 of the as-of 2026-06-30 extracts used for every number in this repo.
 EXPECTED = {
-    "7a_fy2010_2019.csv": None,   # filled by --record
-    "7a_fy2020_present.csv": None,
+    "7a_fy2010_2019.csv":   "01a3e2c7988a6f4052e53f218a309feb2ec2fe42887bebdc0fa94ac8b1024ade",
+    "7a_fy2020_present.csv": "6c1e9132b5141a19f82bdc8ccafb86c9a01662461cad41ddb36a3cf409d8a4fe",
 }
 RAW = os.path.join(os.path.dirname(__file__), "raw")
 UA = {"User-Agent": "Mozilla/5.0 (compatible; sba-7a research replication)"}

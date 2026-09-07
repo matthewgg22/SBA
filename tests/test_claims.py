@@ -103,6 +103,22 @@ def test_C10_the_recent_file_is_mostly_unresolved(new):
     assert (~new.resolved).mean() > 0.75
 
 
+@need
+def test_C11_a_common_window_collapses_the_apparent_deterioration(old, new):
+    """The comparison must window BOTH files, not just the mature one. Unwindowed
+    the gap is 1.22pp and reads as deterioration; on a common 36-month window it
+    is 0.07pp."""
+    def windowed(df, months=36):
+        w = df[df.duration.notna()]
+        ex = w[(w.duration <= months) & w.cause.isin([1, 2])]
+        return (ex.cause == 1).mean()
+    m, y = windowed(old), windowed(new)
+    raw_gap = new[new.resolved].chgoff.mean() - old[old.resolved].chgoff.mean()
+    assert raw_gap > 0.010, "unwindowed gap should look like deterioration"
+    assert abs(y - m) < 0.003, f"windowed gap {abs(y-m):.4f} should be near zero"
+    assert abs(y - m) < raw_gap / 5, "common window should remove most of the gap"
+
+
 # ---------------------------------------------------------------- break-even
 @need
 def test_B_breakeven_is_low_and_insensitive_to_the_tax_assumption():

@@ -39,8 +39,8 @@ def fig_never_sold(d):
         r = 100 * g[g["size"] >= 1_000]["mean"]
         ax.hist(r, bins=np.arange(0, 46, 2.5), alpha=.62, color=col,
                 label=f"{lbl}\nraw sd = {r.std():.2f}%")
-    ax.set_xlabel("unadjusted holder-level charge-off rate (%), institutions with $\\geq$1,000 loans")
-    ax.set_ylabel("institutions")
+    ax.set_xlabel("unadjusted holder-level charge-off rate (%)")
+    ax.set_ylabel("institutions (\u2265 1,000 resolved loans)")
     ax.set_title("The 'lender effect' is reassignment. Unadjusted dispersion is\n"
                  "five times larger among loans that changed hands.", loc="left", fontsize=10)
     ax.text(0.99, 0.42, "with controls (additive fixed effects):\n3.72% vs 10.02%  [L7]",

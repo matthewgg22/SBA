@@ -18,7 +18,8 @@ policy-relevant claim. I believed it for about a day.
 
 ## The line I had not read
 
-From SBA's own data dictionary for this file:
+From SBA's own data dictionary for this file ([`7a_504_foia_data_dictionary.xlsx`](https://data.sba.gov/sites/default/files/uploaded_resources/7a_504_foia_data_dictionary.xlsx),
+accessed 7 September 2026):
 
 > Name of the bank that the loan is currently assigned to.
 
@@ -96,8 +97,13 @@ upper bound on the real effect, not an estimate of it.
 
 A loan-level diff of `BankName` across two extract dates would convert "uninterpretable" into a
 **measured reassignment rate**. That is the single highest-value next step for anyone working with
-this file. I could not do it: SBA's older bulk extracts now return 404, and I have only one
-snapshot. If you have an archived earlier extract, this is the analysis to run.
+this file. I could not do it, and the reason is worth stating precisely: SBA publishes only the
+**current as-of snapshot** of each coverage period. As of 7 September 2026,
+`FOIA_7a_FY2010_FY2019_asof_260630.csv` resolves — and so do the FY1991–99 and FY2000–09 files at
+that same as-of date — but `asof_250630`, `asof_251231` and `asof_241231` all return 404. So the
+public files give you more *coverage*, never a second *observation date*. Every one of them carries
+the same holder snapshot, and a diff needs two. If you have an archived earlier extract, you have
+the one thing that is missing, and this is the analysis to run.
 
 ## The general lesson
 

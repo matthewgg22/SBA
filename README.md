@@ -2,7 +2,7 @@
 
 `BankName` is not the originating lender.
 
-SBA's own data dictionary defines it as the bank the loan is *currently assigned to*. So every
+SBA's own data dictionary defines it as the bank the loan is *currently assigned to*.[^dd] So every
 cross-lender performance comparison built on this file — and there are many — measures who ended
 up **holding** the paper after sixteen years of mergers, failures, and secondary-market sales.
 
@@ -88,8 +88,12 @@ traps/               the four failure modes, in prose
 - **The central question is unanswerable with this file.** No outcome field records *why* a
   business failed. Everything here about causes is inference from structure.
 - **`BankName` cannot be repaired from a single extract.** Measuring the reassignment rate needs
-  a loan-level diff across two extract dates. SBA's older bulk files now 404, so I could not do it.
-  This is the highest-value next step and I have not taken it.
+  a loan-level diff across two *as-of* dates. SBA publishes only the current snapshot of each
+  coverage period: `..._asof_260630.csv` resolves for FY1991–99, FY2000–09 and FY2010–19 alike,
+  while earlier as-of dates (`asof_250630`, `asof_251231`, `asof_241231`) all return 404
+  (checked 7 September 2026). Every published file therefore carries the *same* holder snapshot,
+  and no diff is possible from public data. This is the highest-value next step and I have not
+  taken it.
 - **Break-even is arithmetic, not evidence.** It says how large an effect would have to be. It is
   silent on whether any intervention achieves it.
 - **9.2% of loans have no `BusinessAge` answer at all, rising to 18.7% by FY2019.** Every share
@@ -102,3 +106,7 @@ See [`data/README.md`](data/README.md) for provenance and hashes.
 
 Code is MIT ([`LICENSE`](LICENSE)). The SBA data are US Government works, not subject to domestic
 copyright (17 U.S.C. §105). This repository is not affiliated with or endorsed by the SBA.
+
+[^dd]: U.S. Small Business Administration, *7(a) and 504 FOIA data dictionary*,
+    <https://data.sba.gov/sites/default/files/uploaded_resources/7a_504_foia_data_dictionary.xlsx> (accessed 7 September 2026). The `BankName` row reads, verbatim: "Name of the bank
+    that the loan is currently assigned to."

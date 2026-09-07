@@ -99,14 +99,20 @@ if __name__ == "__main__":
     obs = (d.as_of.iloc[0] - d.approval_date).dt.days/365.25
     obsy = (y.as_of.iloc[0] - y.approval_date).dt.days/365.25
     print(f"      median observation window: {obs.median():.1f} yrs vs {obsy.median():.1f} yrs")
-    # Apply the young file's observation window to the mature file, then compute the SAME
-    # resolved-only statistic. This is the like-for-like comparison; the cross-file
-    # comparison of raw resolved-only rates is not one.
-    w = d[d.duration.notna()].copy()
-    seen = w.duration <= 36                       # only exits observable within 3 years
-    tr = w[seen & w.cause.isin([1,2])]
-    print(f"[C11] restricting the MATURE file to exits within 36 months and computing the SAME "
-          f"resolved-only statistic gives {100*(tr.cause==1).mean():.2f}%, against "
-          f"{100*yr.chgoff.mean():.2f}% on FY2020-26 and {100*res.chgoff.mean():.2f}% on the "
-          f"mature file unrestricted. The young file's apparent excess is a horizon artifact.")
+    # Put BOTH files on the same 36-month observation window and compute the SAME
+    # resolved-only statistic on each. Windowing only the mature file is not a
+    # like-for-like comparison either: the young file's median window is 2.8 years,
+    # but its FY2020 loans have now been observed for six.
+    def windowed(df, months=36):
+        w = df[df.duration.notna()]
+        ex = w[(w.duration <= months) & w.cause.isin([1, 2])]
+        return 100 * (ex.cause == 1).mean(), len(ex)
+
+    mrate, mn = windowed(d)
+    yrate, yn = windowed(y)
+    print(f"[C11] on a common 36-month window the two files give {mrate:.2f}% (mature, n={mn:,}) "
+          f"against {yrate:.2f}% (FY2020-26, n={yn:,}) — a gap of {yrate-mrate:.2f}pp, against the "
+          f"{100*yr.chgoff.mean()-100*res.chgoff.mean():.2f}pp gap between the unwindowed rates "
+          f"({100*yr.chgoff.mean():.2f}% vs {100*res.chgoff.mean():.2f}%). The apparent "
+          f"deterioration is almost entirely a horizon artifact.")
     pd.DataFrame({"months":grid,"aj_cif":cif,"one_minus_km":km}).to_csv("output/tables/incidence.csv", index=False)

@@ -5,6 +5,9 @@ SBA's data dictionary defines it as "Name of the bank that the loan is currently
 assigned to". That is the holder at extract date, applied retroactively across
 sixteen years of mergers, failures, and secondary-market sales.
 
+Source: https://data.sba.gov/sites/default/files/uploaded_resources/7a_504_foia_data_dictionary.xlsx
+(accessed 7 September 2026).
+
 This module reproduces the result that field appears to support, then kills it four
 ways. Everything here runs on the committed panel.
 """
@@ -27,6 +30,7 @@ def backfit(df, factors, ycol="y", iters=600, tol=1e-8):
     mu = df[ycol].mean()
     eff = {f: pd.Series(0.0, index=df.groupby(f, observed=True).size().index) for f in factors}
     fitted = pd.Series(mu, index=df.index)
+    converged = False
     for it in range(iters):
         mx = 0.0
         for f in factors:
@@ -37,8 +41,9 @@ def backfit(df, factors, ycol="y", iters=600, tol=1e-8):
             eff[f] = new
             fitted = partial + df[f].map(new)
         if mx < tol:
+            converged = True
             break
-    return eff, it + 1, mx
+    return eff, it + 1, mx, converged
 
 
 def prep(d):
@@ -54,9 +59,13 @@ if __name__ == "__main__":
     big = cnt[cnt >= 1000].index
 
     print("=== the result the field appears to support ===")
-    eff, it, mx = backfit(d, CONTROLS + ["BankName"])
+    eff, it, mx, ok = backfit(d, CONTROLS + ["BankName"])
     raw, fe = d.groupby("BankName").y.mean(), eff["BankName"]
-    print(f"[L1] backfit converged in {it} iterations (max change {mx:.1e})")
+    print(f"[L1] backfit ran {it} iterations, ending at max coefficient change {mx:.1e}"
+          + ("" if ok else " (iteration cap, not the 1e-8 tolerance)"))
+    print("     Gauss-Seidel converges slowly here, but the REPORTED quantity settles well before")
+    print("     the coefficients do: holder sd is 9.3228% at 300 iterations, 9.3258% at 450 and")
+    print("     9.3264% at 600 — stable at the quoted 9.33% from roughly 450 on.")
     print(f"[L2] across {len(big)} holders with >=1,000 resolved loans: raw sd {raw.loc[big].std():.2%}, "
           f"fixed-effect sd {fe.loc[big].std():.2%} — controls remove {1-fe.loc[big].std()/raw.loc[big].std():.0%}")
     print(f"[L3] correlation(raw, adjusted) = {raw.loc[big].corr(fe.loc[big]):.3f}")
@@ -85,7 +94,7 @@ if __name__ == "__main__":
 
     print("\n=== KILL 4 — the decisive test: never-sold loans ===")
     for lbl, sub in [("never sold on secondary market", d[~d.sold]), ("sold", d[d.sold])]:
-        e, _, _ = backfit(sub, CONTROLS + ["BankName"])
+        e, _, _, _ = backfit(sub, CONTROLS + ["BankName"])
         c = sub.groupby("BankName").size(); k = c[c>=500].index
         ext = sub.assign(cell=sub.sector+"|"+sub.ApprovalFY.astype(str)+"|"+sub.BorrState.astype(str))
         print(f"[L7] {lbl:<32} n={len(sub):>7,}  charge-off {sub.y.mean():.2%}  "

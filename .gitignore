@@ -1,0 +1,10 @@
+# raw FOIA extracts — 436MB, re-downloadable via data/get_data.py
+data/raw/
+*.csv
+!data/sbcs_2026_adoption.csv
+__pycache__/
+*.pyc
+.venv/
+venv/
+.DS_Store
+.ipynb_checkpoints/

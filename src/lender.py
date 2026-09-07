@@ -99,7 +99,19 @@ if __name__ == "__main__":
         ext = sub.assign(cell=sub.sector+"|"+sub.ApprovalFY.astype(str)+"|"+sub.BorrState.astype(str))
         print(f"[L7] {lbl:<32} n={len(sub):>7,}  charge-off {sub.y.mean():.2%}  "
               f"holder FE sd {e['BankName'].loc[k].std():.2%}  ({len(k)} holders >=500)")
-    print("\n     If holder dispersion collapses where loans demonstrably did NOT change hands,")
-    print("     the effect is reassignment. BankName cannot support lender-level inference.")
+    print("\n=== KILL 4b — where does the holder effect RANK once loans never changed hands? ===")
+    for lbl, sub in [("never sold", d[~d.sold]), ("sold", d[d.sold])]:
+        e, _, _, _ = backfit(sub, CONTROLS + ["BankName"])
+        c = sub.groupby("BankName").size(); k = c[c >= 500].index
+        sds = sorted(((f, (e[f].loc[k] if f == "BankName" else e[f]).std())
+                      for f in CONTROLS + ["BankName"]), key=lambda r: -r[1])
+        pos = [f for f, _ in sds].index("BankName") + 1
+        beat = [f for f, _ in sds[:pos - 1]]
+        print(f"[L8] {lbl:<11} holder ranks {pos} of {len(sds)} by fixed-effect sd; "
+              f"beaten by {', '.join(beat) if beat else 'nothing'}")
+    print("\n     On loans that never changed hands the holder effect falls BELOW sector, loan term,")
+    print("     lender channel, firm age and even borrower state — the very controls it was")
+    print("     supposed to beat. If holder dispersion collapses where loans demonstrably did NOT")
+    print("     change hands, the effect is reassignment. BankName cannot support lender inference.")
     pd.DataFrame({"raw": raw.loc[big], "fixed_effect": fe.loc[big],
                   "n": cnt.loc[big]}).to_csv("output/tables/holder_effects.csv")

@@ -83,6 +83,23 @@ If holder identity measured lending quality, this split would not matter. Disper
 `tests/test_claims.py` recomputes this one *without* the backfit — raw dispersion, same split, same
 conclusion — so a bug in the fixed-effects code and a bug in the test would have to agree.
 
+**`[L8]` And the ranking inverts.** The original claim was that holder identity beat industry,
+geography and vintage *combined*. Refit on never-sold loans alone and rank every factor by the
+dispersion of its fixed effects:
+
+| never sold (n=324,191) | sd | | sold (n=104,683) | sd |
+|---|---|---|---|---|
+| sector | 0.204 | | term | 0.304 |
+| term | 0.158 | | sector | 0.231 |
+| lender channel | 0.143 | | firm age | 0.141 |
+| firm age | 0.082 | | lender channel | 0.112 |
+| borrower state | 0.050 | | **holder** | **0.100** |
+| **holder** | **0.037** | | borrower state | 0.037 |
+
+On loans that never changed hands the holder effect ranks **sixth of eight** — below industry,
+loan term, lender channel, firm age and even borrower state. It does not merely shrink; it falls
+below the controls it was supposed to beat.
+
 ## What survives
 
 Nothing at the lender level. `BankName` cannot support cross-lender inference in this file, and the

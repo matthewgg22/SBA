@@ -67,6 +67,24 @@ def test_L7_dispersion_is_three_times_larger_on_loans_that_changed_hands(old):
 
 
 @need
+@slow
+def test_L8_on_never_sold_loans_the_holder_effect_ranks_below_the_controls(old):
+    """The original claim was that holder identity beat industry, geography and
+    vintage combined. On loans that never changed hands it ranks 6th of 8."""
+    from src.lender import backfit, CONTROLS
+    sub = lender.prep(old)
+    sub = sub[~sub.sold]
+    eff, _, _, _ = backfit(sub, CONTROLS + ["BankName"])
+    c = sub.groupby("BankName").size(); k = c[c >= 500].index
+    sds = sorted(((f, (eff[f].loc[k] if f == "BankName" else eff[f]).std())
+                  for f in CONTROLS + ["BankName"]), key=lambda r: -r[1])
+    names = [f for f, _ in sds]
+    assert names.index("BankName") >= 4, f"holder ranked {names.index('BankName')+1}: {names}"
+    for beats in ["sector", "term_b", "age", "BorrState"]:
+        assert names.index(beats) < names.index("BankName"), f"{beats} should outrank holder"
+
+
+@need
 def test_L6_dispersion_attenuates_in_older_vintages(old):
     """A real quality effect would be measured MORE precisely in older, fully
     resolved vintages. It is measured LESS precisely - the signature of mixing."""

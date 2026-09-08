@@ -27,9 +27,9 @@ accessed 7 September 2026):
 stamped retroactively across sixteen years of bank mergers, bank failures, and secondary-market
 sales. It is not a lender identifier at all. It is an ownership snapshot.
 
-## Four checks
+## Five checks
 
-I did not want this to be true, so I tried to establish it four independent ways.
+I did not want this to be true, so I tried to establish it five independent ways.
 
 **`[L4]` Holders carry loans that predate their own existence.** If the field recorded who *made*
 the loan, this would be impossible.
@@ -110,10 +110,47 @@ But "never sold on the secondary market" does not mean "never reassigned" — wh
 move loans without any secondary-market sale, which is exactly what `[L5]` shows. So 3.72% is an
 upper bound on the real effect, not an estimate of it.
 
-## What would actually fix it
+## `[R1]`–`[R5]` The rate, measured
 
-A loan-level diff of `BankName` across two extract dates would convert "uninterpretable" into a
-**measured reassignment rate**. That is the single highest-value next step for anyone working with
+This section used to be headed *"What would actually fix it"* and said the diff was impossible
+from public data, because SBA serves only the current as-of snapshot and earlier dates 404.
+
+That was wrong. **The Internet Archive has the earlier snapshot.** A CDX query against
+`data.sba.gov/sites/default/files/uploaded_resources/*` returns
+`FOIA_7a_FY2010_FY2019_asof_260331.csv`, captured 17 July 2026, HTTP 200, 224MB, served in full.
+Two snapshots, three months apart, joined on borrower name, street, city, state, approval date
+and approval amount:
+
+| | |
+|---|---|
+| loans matched in both snapshots | **536,486** (98.3% of the file) |
+| `BankName` string differs | 8,527 (1.589%) |
+| **differs after normalising name forms** | **3,300 (0.615%)** |
+
+**61% of the apparent change is SBA respelling the same institution** — "ALTRA FCU" becoming
+"Altra Federal Credit Union", "S & T Bank" becoming "SandT Bank". That is itself worth knowing
+for anyone matching on this field across releases.
+
+The genuine holder changes are ordinary banking events: Meadows Bank → America First FCU (601
+loans), LendingClub → Happen Bank (594), Heritage Bank of Commerce → Citizens Business Bank (427),
+First Foundation → Sunflower Bank (159).
+
+**0.615% per quarter.** At a constant rate that is ~2.44% a year, and compounded across the
+sixteen years the file spans it would mean roughly a third of loans had changed holder at least
+once. *The quarterly figure is measured; the sixteen-year figure is arithmetic.* One quarter is
+one observation, and this one contains two events moving ~600 loans apiece. More snapshots would
+settle it, and the Archive has them.
+
+## What I got wrong about getting it
+
+I wrote that this analysis was impossible because the data did not exist. It existed, in the most
+obvious place anyone would look for an old copy of a public file. The check that would have caught
+it was one CDX query.
+
+That is the same failure as the original result, one level up. There I trusted a column name
+without reading the dictionary; here I trusted a 404 without asking whether anyone had archived
+the file. **A retrieval failure is a task, not a finding** — and stating it as a limitation in a
+README gave it a permanence it never earned. That is the single highest-value next step for anyone working with
 this file. I could not do it, and the reason is worth stating precisely: SBA publishes only the
 **current as-of snapshot** of each coverage period. As of 7 September 2026,
 `FOIA_7a_FY2010_FY2019_asof_260630.csv` resolves — and so do the FY1991–99 and FY2000–09 files at

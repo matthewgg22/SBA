@@ -96,6 +96,30 @@ def test_L6_dispersion_attenuates_in_older_vintages(old):
     assert late > 2.0 * early, f"early {early:.4f} late {late:.4f}"
 
 
+@need
+@slow
+def test_R_reassignment_is_measurable_and_small_per_quarter():
+    """The repo previously claimed this could not be measured from public data.
+    It can, against an Internet Archive snapshot. Skips if that 224MB file has
+    not been fetched."""
+    import os, pytest as _p
+    from src import reassignment as rr
+    if not os.path.exists(rr.CACHE):
+        _p.skip("archived snapshot not downloaded - run `python3 -m src.reassignment`")
+    r = rr.run()
+    assert r["matched"] > 500_000
+    assert 0.003 < r["q"] < 0.012, f"quarterly holder change {r['q']:.4f}"
+    # most apparent change is respelling, not reassignment
+    assert r["raw"] > r["real"] * 1.5
+
+
+def test_normalise_collapses_name_variants():
+    from src.reassignment import normalise
+    assert normalise("ALTRA FCU") == normalise("Altra Federal Credit Union")
+    assert normalise("S & T Bank") == normalise("S and T Bank")
+    assert normalise("Live Oak Banking Company") != normalise("Happen Bank")
+
+
 # ---------------------------------------------------------------- TRAPS 2 & 4
 @need
 def test_C5_prepayment_dominates_resolved_exits(old):

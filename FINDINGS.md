@@ -80,6 +80,27 @@ signature of mixing — older loans have had more time to be reassigned.
 SunTrust, one of the decade's largest 7(a) originators, survives in the file as **exactly one loan
 in 479,007**.
 
+### The rate, measured
+
+`[R1]`–`[R5]` · `src/reassignment.py`
+
+An earlier version of this file said the reassignment rate could not be measured from public data.
+It can: the **Internet Archive** holds `FOIA_7a_FY2010_FY2019_asof_260331.csv`, three months before
+the current snapshot. Joining the two on borrower and loan identity:
+
+| | |
+|---|---|
+| matched in both snapshots | **536,486** (98.3%) |
+| `BankName` string differs | 8,527 (1.589%) |
+| **differs after normalising name forms** | **3,300 (0.615%)** |
+
+**0.615% of loans change holder per quarter** `[R4]`. Two further things fall out. First, **61% of
+the apparent change is SBA respelling one institution** — a trap for anyone matching this field
+across releases. Second, at a constant rate 0.615% a quarter compounds to roughly a third of the
+file changing holder at least once over sixteen years, which is the order of magnitude the
+reassignment story needs. *That last figure is arithmetic on one quarter's observation, not a
+measurement.*
+
 ---
 
 ## 3. Prepayment is the dominant exit, and it is not censoring

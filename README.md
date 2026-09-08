@@ -25,7 +25,7 @@ answer an ordinary policy question with them.
 
 | # | Trap | Consequence if missed |
 |---|------|----------------------|
-| [1](traps/01-bankname.md) | `BankName` is the current assignee, not the originator | Lender league tables measure portfolio sales |
+| [1](traps/01-bankname.md) | `BankName` is the current assignee, not the originator | Lender league tables measure portfolio sales — 0.615% of loans change holder per quarter |
 | [2](traps/02-resolved-only.md) | Recent vintages are 78% unresolved | Naive rates read as a deterioration that is really immaturity |
 | [3](traps/03-businessage.md) | The `BusinessAge` vocabulary changes *inside* one file | A filter written for one half silently drops the other |
 | [4](traps/04-competing-risks.md) | Prepayment is 92% of exits and is not censoring | 1−Kaplan-Meier overstates lifetime charge-off by 122% |
@@ -57,7 +57,7 @@ Trap 3 cost me a real finding: my filter encoded only the later vocabulary and s
 
 ```bash
 pip install -r requirements.txt
-make test     # 24 tests re-deriving every tagged claim      (~15s)
+make test     # 27 tests re-deriving every tagged claim      (~15s)
 make quick    # ranking, incidence, break-even               (~45s)
 make fast     # the above plus trap 1's three backfits       (~6 min)
 make all      # re-download the FOIA extracts and rebuild from raw
@@ -80,6 +80,7 @@ src/ranking.py       what predicts charge-off, permutation-corrected
 src/incidence.py     competing risks; maturity censoring (traps 2 and 4)
 src/lender.py        the lender result, and the four tests that kill it (trap 1)
 src/breakeven.py     inverts the policy question into a threshold
+src/reassignment.py  measures holder churn against an Internet Archive snapshot
 src/figures.py       the two figures above
 tests/               re-derives every [Cn]/[Ln]/[Bn]/[V1] tag
 traps/               the four failure modes, in prose
@@ -87,15 +88,18 @@ traps/               the four failure modes, in prose
 
 ## Honest limitations
 
+- **One quarter is one observation.** The 0.615% is measured; the 16-year implication is
+  arithmetic, and that quarter contains two lumpy events (Meadows Bank and LendingClub each
+  moving ~600 loans). More snapshots would settle it.
 - **The central question is unanswerable with this file.** No outcome field records *why* a
   business failed. Everything here about causes is inference from structure.
-- **`BankName` cannot be repaired from a single extract.** Measuring the reassignment rate needs
-  a loan-level diff across two *as-of* dates. SBA publishes only the current snapshot of each
-  coverage period: `..._asof_260630.csv` resolves for FY1991–99, FY2000–09 and FY2010–19 alike,
-  while earlier as-of dates (`asof_250630`, `asof_251231`, `asof_241231`) all return 404
-  (checked 7 September 2026). Every published file therefore carries the *same* holder snapshot,
-  and no diff is possible from public data. This is the highest-value next step and I have not
-  taken it.
+- **The reassignment rate is now measured, and this bullet used to say it couldn't be.** SBA
+  serves only the current as-of snapshot — earlier dates 404 — so I wrote that no diff was
+  possible from public data. That was wrong: the **Internet Archive** has
+  `..._asof_260331.csv`, three months earlier, and serves it in full. Diffing the two gives
+  **0.615% of loans changing holder in one quarter** ([`src/reassignment.py`](src/reassignment.py)).
+  The lesson I'd rather have learned earlier: *"I could not get the data" is a task, not a
+  finding.* See [`traps/01-bankname.md`](traps/01-bankname.md).
 - **Break-even is arithmetic, not evidence.** It says how large an effect would have to be. It is
   silent on whether any intervention achieves it.
 - **9.2% of loans have no `BusinessAge` answer at all, rising to 18.7% by FY2019.** Every share

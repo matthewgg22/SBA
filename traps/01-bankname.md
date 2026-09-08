@@ -138,8 +138,14 @@ First Foundation → Sunflower Bank (159).
 **0.615% per quarter.** At a constant rate that is ~2.44% a year, and compounded across the
 sixteen years the file spans it would mean roughly a third of loans had changed holder at least
 once. *The quarterly figure is measured; the sixteen-year figure is arithmetic.* One quarter is
-one observation, and this one contains two events moving ~600 loans apiece. More snapshots would
-settle it, and the Archive has them.
+one observation, and this one contains two events moving ~600 loans apiece.
+
+**And there is only one extra snapshot.** A CDX sweep of
+`data.sba.gov/sites/default/files/uploaded_resources/*` returns three archived 7(a) files across
+exactly two as-of dates — 260331 and 260630 — both of which this analysis now uses. So the series
+cannot be extended today from the Archive alone. Extending it means either finding another mirror
+of an earlier release, or waiting for SBA's next quarterly file and diffing forward. That is a
+real limit, and it is stated here rather than left as an implied "more data exists".
 
 ## What I got wrong about getting it
 

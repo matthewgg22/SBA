@@ -90,7 +90,8 @@ traps/               the four failure modes, in prose
 
 - **One quarter is one observation.** The 0.615% is measured; the 16-year implication is
   arithmetic, and that quarter contains two lumpy events (Meadows Bank and LendingClub each
-  moving ~600 loans). More snapshots would settle it.
+  moving ~600 loans). Only one earlier snapshot exists in the Internet Archive and it is already
+  used here, so extending the series needs another mirror or SBA's next quarterly release.
 - **The central question is unanswerable with this file.** No outcome field records *why* a
   business failed. Everything here about causes is inference from structure.
 - **The reassignment rate is now measured, and this bullet used to say it couldn't be.** SBA

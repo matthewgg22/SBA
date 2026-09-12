@@ -42,10 +42,19 @@ def normalise(x):
 
 
 def fetch():
+    """The archived snapshot. Auto-downloads; ~224MB, cached thereafter."""
     if not os.path.exists(CACHE):
-        print(f"downloading the 31 Mar 2026 snapshot from the Internet Archive (~224MB)...")
+        print("downloading the 31 Mar 2026 snapshot from the Internet Archive (~224MB)...")
+        os.makedirs(os.path.dirname(CACHE), exist_ok=True)
         urllib.request.urlretrieve(WAYBACK, CACHE)
     return CACHE
+
+
+def available():
+    """Both snapshots present? The CURRENT extract is not committed (436MB) and is
+    fetched by `make data`, so this module is the one part of the repo that cannot
+    run from the committed panels alone."""
+    return os.path.exists(CURRENT)
 
 
 def key(d):
@@ -57,6 +66,11 @@ def key(d):
 
 
 def load_pair():
+    if not available():
+        raise FileNotFoundError(
+            "the current FY2010-19 extract is not on disk.\n"
+            "    This module needs BOTH snapshots and the raw extracts are not committed.\n"
+            "    Run `make data` (or `python3 data/get_data.py`) to fetch it, then retry.")
     cols = KEY + ["BankName", "LoanStatus"]
     jun = pd.read_csv(CURRENT, usecols=cols, low_memory=False)
     mar = pd.read_csv(fetch(), low_memory=False)

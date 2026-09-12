@@ -42,7 +42,16 @@ the loans each factor actually scores — cells below n=30 are dropped by `resol
 - firm age removes **0.31%**. Jobs supported is near zero, at 0.05%.
 - what the file *does* predict is loan **structure**: the term band alone removes **7.31%**, more
   than every firm characteristic combined (age + size + jobs = 0.60%). That is a fact about how
-  loans are written, not about which businesses survive.
+  loans are written, not about which businesses survive. Term is set at underwriting, jointly with
+  the lender's read of the borrower, and encodes information the file does not otherwise carry —
+  so reading it as a borrower characteristic inverts the causal direction.
+
+**What the null does not say.** It is not a claim that failure is random, and not a claim that
+industry and geography are irrelevant. It is a statement about *recorded covariates in one
+administrative file*. Two mechanisms fit it and this file cannot separate them: the determinants
+may be genuinely idiosyncratic, or systematic but unrecorded — cash-flow management, the quality of
+the books. Establishing that the public file cannot tell them apart, and quantifying how far short
+it falls, is the contribution.
 
 The government guarantees these loans, has published this file for over a decade, and records
 neither why a business failed nor a stable identifier for who lent the money.
@@ -79,6 +88,22 @@ signature of mixing — older loans have had more time to be reassigned.
 
 SunTrust, one of the decade's largest 7(a) originators, survives in the file as **exactly one loan
 in 479,007**.
+
+**The error is not classical, which is why it is large.** Classical measurement error in a
+regressor attenuates — it pulls estimates toward zero. Reassignment does not, because it is not
+random with respect to the outcome: sold loans charge off at 11.03% against 6.97% for never-sold.
+The loans that move are disproportionately the loans that fail, so the induced error correlates
+with charge-off rather than being independent of it, and its sign in any comparison depends on
+which institutions sold and when. That is why the artifact dominates every borrower characteristic
+rather than adding noise to a weak signal. (The split is consistent with selection on risk but is
+not a test of it: the file records the sale flag and the outcome, not what the seller knew.)
+
+**The general shape.** `BankName` is not mismeasured, mislinked or misreported. It is correct — as
+of the date the file was produced. The variable is defined at **extract time** rather than **event
+time**, so every quarterly release silently restates sixteen years of history to match present
+ownership. That is a failure mode with no survey analogue, and it is invisible to the checks
+researchers normally run: the data are complete, internally consistent, stable in format, and the
+column has a plausible name.
 
 ### The rate, measured
 

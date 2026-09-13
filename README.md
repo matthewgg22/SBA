@@ -18,6 +18,13 @@ runnable code that demonstrates the trap and then the check that catches it.
 
 ## Why this file, and why the traps matter
 
+The 7(a) programme is one of the two routes into American business ownership. The other is equity,
+and it is well studied; this one is not. Roughly 53,000 businesses a year borrow through it and
+about 18,600 of those are new. Brown and Earle show credit constraints bind for exactly this
+population before a loan arrives (*Journal of Finance*, 2017). What happens to them afterwards is
+what this file is supposed to record — and the analysis below is about what it can and cannot
+support.
+
 The 7(a) programme guarantees roughly $28bn of small-business credit a year. SBA has published
 loan-level FOIA extracts for over a decade, and they are the main public evidence base for how
 guaranteed small-business lending performs. Every trap below is one I hit myself while trying to
@@ -44,7 +51,7 @@ Trap 3 cost me a real finding: my filter encoded only the later vocabulary and s
 [`FINDINGS.md`](FINDINGS.md) states each result with the tag that reproduces it. The short version:
 
 - **Nothing in this file explains business failure.** The strongest external classifier
-  (sector × vintage × state, 3,484 cells) removes **1.5%** of outcome variance — so 98.5% of the
+  (sector × vintage × state, 3,484 cells) removes **1.53%** of outcome variance — so 98.5% of the
   variation sits *within* a narrow industry-year-state cell. Firm age removes 0.3%. Loan
   *structure* — the term band, at 7.3% — beats every firm characteristic combined.
 - The federal government guarantees these loans, publishes this file, and records neither why a

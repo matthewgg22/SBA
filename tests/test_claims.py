@@ -40,6 +40,10 @@ def test_L5_major_originators_since_acquired_are_entirely_absent(old):
     present = [n for n in lender.MERGED_AWAY
                if names.str.contains(n, regex=False).any()]
     assert present == [], f"expected none, found: {present}"
+    # 13 institutions, 18 name variants. The variant count is what gets searched; the
+    # lineage count is what the paper may claim. Conflating them is how "eighteen
+    # originators" got into print when BB&T and Branch Banking and Trust are one bank.
+    assert len(lender.MERGED_LINEAGES) == 13
     assert len(lender.MERGED_AWAY) == 18
 
 @need

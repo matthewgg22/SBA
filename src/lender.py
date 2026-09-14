@@ -19,10 +19,30 @@ CONTROLS = ["sector","ApprovalFY","BorrState","size_b","term_b","age","proc"]
 # Institutions that did not exist for part of the FY2010-19 window.
 FOUNDED = {"VelocitySBA, LLC": 2016, "Truist Bank": 2019, "BayFirst National Bank": 2017}
 # Major 7(a) originators of the 2010s that have since been acquired or failed.
-MERGED_AWAY = ["Ridgestone Bank","First Home Bank","Branch Banking and Trust","BB&T",
-               "CenterState Bank","Umpqua Bank","BBCN Bank","Nara Bank","Wilshire Bank",
-               "BancorpSouth Bank","IberiaBank","Cadence Bank","BBVA Compass","MB Financial",
-               "TCF National Bank","Talmer Bank","MUFG Union Bank","Seaway Bank"]
+#
+# GROUPED BY LINEAGE, not by string. An earlier version was a flat list of 18 names and the
+# panel reported "18 originators," which overcounted: BB&T and "Branch Banking and Trust" are
+# one institution under two spellings, and Nara + Wilshire became BBCN. The claim does not
+# depend on the count -- it is that EVERY acquired lineage appears only under its successor,
+# never under the name that made the loan -- but a wrong count in a panel about a naming trap
+# is the wrong number to get wrong.
+MERGED_LINEAGES = {
+    "Ridgestone Bank":        ["Ridgestone Bank"],
+    "First Home Bank":        ["First Home Bank"],
+    "BB&T":                   ["Branch Banking and Trust", "BB&T"],
+    "CenterState Bank":       ["CenterState Bank"],
+    "Umpqua Bank":            ["Umpqua Bank"],
+    "BBCN (Nara/Wilshire)":   ["BBCN Bank", "Nara Bank", "Wilshire Bank"],
+    "BancorpSouth/Cadence":   ["BancorpSouth Bank", "Cadence Bank"],
+    "IberiaBank":             ["IberiaBank"],
+    "BBVA Compass":           ["BBVA Compass"],
+    "MB Financial":           ["MB Financial"],
+    "TCF/Talmer":             ["TCF National Bank", "Talmer Bank"],
+    "MUFG Union Bank":        ["MUFG Union Bank"],
+    "Seaway Bank":            ["Seaway Bank"],
+}
+# Flat list of name variants, kept for callers that want to scan strings.
+MERGED_AWAY = [n for v in MERGED_LINEAGES.values() for n in v]
 
 
 def backfit(df, factors, ycol="y", iters=600, tol=1e-8):
@@ -79,9 +99,14 @@ if __name__ == "__main__":
                   f"{100*pre:>5.1f}% approved before it existed")
 
     print("\n=== KILL 2 — originators that merged away hold nothing ===")
-    present = [n for n in MERGED_AWAY if d.BankName.str.contains(n, regex=False, na=False).any()]
-    print(f"[L5] of {len(MERGED_AWAY)} major 2010s originators since acquired, {len(present)} appear "
-          f"in the file at all: {present if present else 'none'}")
+    present = {lin: [n for n in names if d.BankName.str.contains(n, regex=False, na=False).any()]
+               for lin, names in MERGED_LINEAGES.items()}
+    live = {lin: v for lin, v in present.items() if v}
+    print(f"[L5] of {len(MERGED_LINEAGES)} major 2010s originating lineages since acquired or "
+          f"failed ({len(MERGED_AWAY)} name variants), {len(live)} appear in the file at all: "
+          f"{sorted(live) if live else 'none'}")
+    print("     Every one of these lineages made 7(a) loans in this window. None of those loans")
+    print("     is recorded under the name that made it: the field carries the successor.")
 
     print("\n=== KILL 3 — dispersion ATTENUATES in older vintages ===")
     print("     A real lender-quality effect should be measured MORE precisely in older vintages,")

@@ -70,7 +70,11 @@ less precisely. Attenuation with age is what mixing looks like: the longer a loa
 outstanding, the more chances it has had to be reassigned, and the more the holder's book converges
 on the population average.
 
-**`[L7]` The decisive test: loans that never changed hands.** The file flags whether a loan was sold
+**`[L7]` The decisive test: loans that never changed hands.** The file flags whether a loan was sold **The indicator is
+imperfect and the paper says so**: `SoldSecMrktInd` is blank on 75.6% of resolved loans and
+explicitly "N" on 111, so the comparison group is "no sale marker recorded". It is still
+loan-level — 78 of the 113 holders with 500+ resolved loans carry a mix — and the
+misclassification attenuates the contrast rather than creating it.
 on the secondary market. Split on it and refit:
 
 | | n | charge-off | holder FE sd |

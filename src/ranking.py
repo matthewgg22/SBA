@@ -14,7 +14,8 @@ FACTORS = [("term_b","loan structure"), ("BankName","current holder"),
            ("ext_cell","external: sector x vintage x state"), ("proc","lender channel"),
            ("BorrState","external: geography"), ("age","firm-level"),
            ("sector","external: industry"), ("size_b","firm-level"),
-           ("ApprovalFY","external: macro vintage"), ("jobs_b","firm-level")]
+           ("ApprovalFY","external: macro vintage"), ("jobs_b","firm-level"),
+           ("franchise","firm-level")]
 
 
 def resolution(y, key, minn=30):
@@ -90,3 +91,12 @@ if __name__ == "__main__":
     for f in ["term_b", "age"]:
         r = t[t.factor.eq(f)]
         print(f"     {f:<8} removes {100*r.variance_share.iloc[0]:.2f}%")
+
+    # [C12] Franchising: how much of the cohort is NOT an independent owner-operator.
+    g = d.groupby("franchise").y.agg(["size","mean"])
+    tgt = d[d.greenfield & d.GrossApproval.lt(150e3)]
+    gt = tgt.groupby("franchise").y.agg(["size","mean"])
+    print(f"\n[C12] franchisees are {100*g.loc[True,'size']/len(d):.2f}% of resolved loans "
+          f"and charge off at {100*g.loc[True,'mean']:.2f}% against {100*g.loc[False,'mean']:.2f}%; "
+          f"in the greenfield <$150K cohort {100*gt.loc[True,'size']/len(tgt):.2f}% "
+          f"({100*gt.loc[True,'mean']:.2f}% vs {100*gt.loc[False,'mean']:.2f}%)")

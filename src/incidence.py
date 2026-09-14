@@ -115,4 +115,13 @@ if __name__ == "__main__":
           f"{100*yr.chgoff.mean()-100*res.chgoff.mean():.2f}pp gap between the unwindowed rates "
           f"({100*yr.chgoff.mean():.2f}% vs {100*res.chgoff.mean():.2f}%). The apparent "
           f"deterioration is almost entirely a horizon artifact.")
+    # [C13] Timing WITHIN the target cohort. The book-wide median (55.9 months) is not the
+    # number an evaluation of THIS cohort has to survive, and the two differ by nine months.
+    # An evaluation window is set from this panel, not from the book.
+    tc = d[d.greenfield & d.GrossApproval.lt(150e3) & d.chgoff]
+    cum = {m: 100 * (tc.duration <= m).mean() for m in (12, 24, 36, 48, 60)}
+    print(f"\n[C13] greenfield <$150K cohort: {len(tc):,} charge-offs, median "
+          f"{tc.duration.median():.1f} months (book-wide {d.loc[d.chgoff,'duration'].median():.1f}); "
+          + ", ".join(f"{v:.1f}% by {m}m" for m, v in cum.items()))
+    print("      an evaluation reading out at 36 months has observed a third of them.")
     pd.DataFrame({"months":grid,"aj_cif":cif,"one_minus_km":km}).to_csv("output/tables/incidence.csv", index=False)

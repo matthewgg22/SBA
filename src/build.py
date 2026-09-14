@@ -13,7 +13,8 @@ KEEP = ["ApprovalDate","ApprovalFY","GrossApproval","SBAGuaranteedApproval","Bus
         "LoanStatus","TermInMonths","BorrState","NaicsCode","BankName","ProcessingMethod",
         "JobsSupported","ChargeOffDate","PaidInFullDate","GrossChargeOffAmount","SoldSecMrktInd",
         "AsOfDate",
-        "BankFDICNumber","BankNCUANumber","BankState"]
+        "BankFDICNumber","BankNCUANumber","BankState",
+        "FranchiseCode","FranchiseName"]
 SECTOR = {"31":"31-33","32":"31-33","33":"31-33","44":"44-45","45":"44-45","48":"48-49","49":"48-49"}
 
 
@@ -39,6 +40,10 @@ def build(src, dest):
     d["chgoff"] = d.LoanStatus.eq("CHGOFF")
     d["sold"] = d.SoldSecMrktInd.astype(str).str.upper().str.startswith("Y")
     d["depository"] = d.BankFDICNumber.notna() | d.BankNCUANumber.notna()
+    # A franchisee is not an independent owner-operator: the franchisor supplies some of the
+    # back-office function an assistance programme would otherwise have to supply. Kept so the
+    # share can be stated rather than assumed away.
+    d["franchise"] = d.FranchiseCode.notna()
     ad = pd.to_datetime(d.ApprovalDate, errors="coerce")
     co = pd.to_datetime(d.ChargeOffDate, errors="coerce")
     pf = pd.to_datetime(d.PaidInFullDate, errors="coerce")

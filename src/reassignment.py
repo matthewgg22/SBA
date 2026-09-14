@@ -103,16 +103,26 @@ if __name__ == "__main__":
     print(f"[R2] BankName string differs      : {r['raw']:,}  ({100*r['raw']/r['matched']:.3f}%)")
     print(f"[R3] after normalising name forms : {r['real']:,}  ({100*r['q']:.3f}%)")
     print(f"     {r['raw']-r['real']:,} of the raw differences were one institution respelled")
-    print(f"\n[R4] ONE QUARTER of holder change: {100*r['q']:.3f}%")
-    print(f"     annualised at a constant rate : ~{100*(1-(1-r['q'])**4):.2f}%")
-    print(f"     compounded over the file's 16 years: ~{100*(1-(1-r['q'])**64):.0f}% of loans")
-    print(f"     would have changed holder at least once.\n")
-    print("     THE LAST TWO LINES ARE ARITHMETIC, NOT MEASUREMENT. One quarter is one")
-    print("     observation, and this one contains two lumpy events (Meadows Bank and")
-    print("     LendingClub each moving ~600 loans). Treat the 0.65% as measured and the")
-    print("     16-year figure as an illustration of what that rate implies if sustained.\n")
     fl = pd.DataFrame({"mar": r["m"].BankName[r["real_mask"]],
                        "jun": r["j"].BankName[r["real_mask"]]}).value_counts()
+    # THE UNIT OF OBSERVATION IS THE INSTITUTION PAIR, NOT THE LOAN. Loans do not move
+    # independently -- a portfolio sale moves hundreds at once -- so 3,300 moved loans are not
+    # 3,300 draws. They are this many distinct (from, to) events, and the effective sample size
+    # for any statement about the RATE is the event count, not the loan count.
+    n_ev = len(fl)
+    top5 = fl.head(5).sum()
+    print(f"\n[R4] ONE QUARTER of holder change: ~{100*r['q']:.1f}% of matched loans")
+    print(f"     ({r['real']:,} loans, but only {n_ev} distinct institution-to-institution events;")
+    print(f"      the five largest account for {top5:,} of them, {100*top5/r['real']:.0f}%)")
+    print(f"     annualised at a constant rate : ~{100*(1-(1-r['q'])**4):.1f}%")
+    print(f"     compounded over the file's 16 years: ~{100*(1-(1-r['q'])**64):.0f}% of loans")
+    print(f"     would have changed holder at least once.\n")
+    print(f"     QUOTE THIS AS ~{100*r['q']:.1f}%, NOT {100*r['q']:.3f}%. The third digit is")
+    print("     cross-sectional precision on a number whose uncertainty is temporal: one quarter")
+    print(f"     is one observation, and with {n_ev} events driving it, one more portfolio sale or")
+    print("     one fewer moves the figure by more than the digit claims to resolve.")
+    print("     THE LAST TWO LINES ARE ARITHMETIC, NOT MEASUREMENT -- an illustration of what")
+    print("     this rate implies if sustained, not a measurement of sixteen years.\n")
     print("[R5] largest holder changes in the quarter:")
     for (a, b), n in fl.head(8).items():
         print(f"     {n:>5,}  {a[:36]:<36} -> {b[:36]}")

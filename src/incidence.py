@@ -108,13 +108,41 @@ if __name__ == "__main__":
         ex = w[(w.duration <= months) & w.cause.isin([1, 2])]
         return 100 * (ex.cause == 1).mean(), len(ex)
 
+    # A 36-month window is only honest on vintages that have actually been observed for 36
+    # months. FY2024-26 have not, so including them drags the pooled rate down for the same
+    # censoring reason the window exists to remove.
+    def fully_observed(df, months=36):
+        obs = (df.as_of.iloc[0] - df.approval_date).dt.days / 30.44
+        return df[obs >= months]
+
+    yf = fully_observed(y)
     mrate, mn = windowed(d)
-    yrate, yn = windowed(y)
-    print(f"[C11] on a common 36-month window the two files give {mrate:.2f}% (mature, n={mn:,}) "
-          f"against {yrate:.2f}% (FY2020-26, n={yn:,}) — a gap of {yrate-mrate:.2f}pp, against the "
+    yrate, yn = windowed(yf)
+    print(f"[C11] on a common 36-month window, restricted to vintages observed that long, the two "
+          f"files give {mrate:.2f}% (mature, n={mn:,}) against {yrate:.2f}% "
+          f"(FY{yf.ApprovalFY.min()}-{yf.ApprovalFY.max()}, n={yn:,}) — a gap of "
+          f"{yrate-mrate:.2f}pp, against the "
           f"{100*yr.chgoff.mean()-100*res.chgoff.mean():.2f}pp gap between the unwindowed rates "
           f"({100*yr.chgoff.mean():.2f}% vs {100*res.chgoff.mean():.2f}%). The apparent "
-          f"deterioration is almost entirely a horizon artifact.")
+          f"deterioration is not merely absent on a like-for-like window — it reverses.")
+
+    # [C11b] ...but the pooled figure hides vintage variation larger than the gap it reports.
+    # Averaging FY2021 with FY2023 manufactures agreement out of two vintages that disagree
+    # by more than either disagrees with the mature book.
+    print("      per vintage, same window — the pooled number is an average of disagreement:")
+    for lbl, df in [("mature", d), ("young", y)]:
+        cells = []
+        for fy in sorted(df.ApprovalFY.unique()):
+            sub = df[df.ApprovalFY.eq(fy)]
+            obs = (sub.as_of.iloc[0] - sub.approval_date).dt.days / 30.44
+            r, n = windowed(sub)
+            mark = "" if obs.median() >= 36 else "*"
+            cells.append(f"FY{fy} {r:.1f}%{mark}")
+        print(f"        {lbl:<7} " + "  ".join(cells))
+    print("      * vintage not yet observed for 36 months; excluded from the pooled figure above.")
+    print("      FY2021 (3.6%) against FY2023 (16.5%) is a 4.6x spread WITHIN the young file —")
+    print("      larger than any gap between the files. The horizon artifact is real and the")
+    print("      vintage variation is also real; the pooled comparison reports neither.")
     # [C13] Timing WITHIN the target cohort. The book-wide median (55.9 months) is not the
     # number an evaluation of THIS cohort has to survive, and the two differ by nine months.
     # An evaluation window is set from this panel, not from the book.

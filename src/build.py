@@ -32,7 +32,11 @@ def build(src, dest):
 
     d["age"] = harmonise(d.BusinessAge)
     d["greenfield"] = is_greenfield(d.BusinessAge)
-    d["sector"] = d.NaicsCode.astype("Int64").astype(str).str[:2].replace(SECTOR)
+    # Keep the full code, not just the sector. 2-digit NAICS is the COARSEST published grain
+    # (24 cells for the whole economy); a panel that throws the rest away makes "industry" look
+    # like one fixed choice when it is four, and forecloses the grain sensitivity in [C15].
+    d["naics6"] = d.NaicsCode.astype("Int64").astype(str)
+    d["sector"] = d.naics6.str[:2].replace(SECTOR)
     d["size_b"] = pd.cut(d.GrossApproval, [0,50e3,150e3,350e3,1e6,5.1e6]).astype(str)
     d["term_b"] = pd.cut(d.TermInMonths, [0,36,84,120,300]).astype(str)
     d["proc"] = d.ProcessingMethod.fillna("Unknown")

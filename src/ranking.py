@@ -43,6 +43,45 @@ def closed_form_null(K, N, pbar):
     return (K - 1) / N * pbar * (1 - pbar)
 
 
+def cell_spread(y, key, minn=30):
+    """Loan-weighted percentiles of the cell charge-off rate.
+
+    WHY THIS EXISTS. "98.5% of variance is within-cell" is a ratio, and for a rare binary
+    outcome that ratio is bounded near zero almost regardless of what the factor is -- eta^2
+    cannot be large when p(1-p) is 0.073. Reporting only the ratio makes a property of the
+    statistic look like a discovery. The p10-p90 spread of the cell rates is the magnitude the
+    ratio hides: it says how different the cells actually are, in the units a reader cares about.
+    Both numbers are true and neither alone is honest."""
+    t = pd.DataFrame({"y": np.asarray(y), "k": np.asarray(key)})
+    g = t.groupby("k", observed=True).y.agg(["size","mean"])
+    g = g[g["size"] >= minn].sort_values("mean")
+    cw = g["size"].cumsum() / g["size"].sum()
+    q = lambda p: float(g["mean"][cw >= p].iloc[0])
+    return q(0.10), q(0.50), q(0.90)
+
+
+def naics_grain(d, digits, draws=50, seed=7):
+    """Signal in industry alone, and in the external cell, at a given NAICS grain.
+
+    TRAP: the headline uses 2-digit NAICS, which is the COARSEST published grain -- 24 cells for
+    the whole economy. Calling that "narrowly defined industry" overstates the control. Finer
+    grains carry more signal and cover fewer loans; both have to be reported together, because a
+    var_share computed on a fifth of the book is not comparable to one computed on all of it."""
+    rng = np.random.default_rng(seed)
+    y = d.y.values
+    n = d.naics6.str[:digits]
+    out = {}
+    for label, key in [("industry", n),
+                       ("ext_cell", n + "|" + d.ApprovalFY.astype(str) + "|" + d.BorrState.astype(str))]:
+        obs = resolution(y, key)
+        rp, rn = retained_base(y, key)
+        null = float(np.nanmean([resolution(rng.permutation(y), key) for _ in range(draws)]))
+        K = int((d.groupby(key, observed=True).size() >= 30).sum())
+        out[label] = dict(cells=K, retained=rn, coverage=rn/len(d),
+                          excess=obs-null, var_share=(obs-null)/(rp*(1-rp)))
+    return out
+
+
 def prep(d):
     d = d[d.resolved].copy()
     d["y"] = d.chgoff.astype(float)
@@ -91,6 +130,30 @@ if __name__ == "__main__":
     for f in ["term_b", "age"]:
         r = t[t.factor.eq(f)]
         print(f"     {f:<8} removes {100*r.variance_share.iloc[0]:.2f}%")
+
+    # [C14] The magnitude the variance ratio hides.
+    print("\n[C14] between-cell spread of the charge-off rate (loan-weighted p10 / p50 / p90):")
+    for col, lbl in [("ext_cell","external: sector x vintage x state"), ("BankName","current holder"),
+                     ("term_b","loan structure")]:
+        lo, mid, hi = cell_spread(d.y, d[col])
+        print(f"      {lbl:<36} {100*lo:5.2f}%  {100*mid:5.2f}%  {100*hi:5.2f}%   "
+              f"(p90-p10 {100*(hi-lo):5.2f}pp, {hi/lo:.1f}x)")
+    print("      The cells differ by a factor of four and still leave ~98% of the variance")
+    print("      unexplained. For a rare binary outcome both statements are ordinary; quoting")
+    print("      only the ratio would make a property of the statistic look like a finding.")
+
+    # [C15] NAICS grain. 2-digit is the coarsest published grain, not a narrow control.
+    print("\n[C15] industry signal by NAICS grain (coverage = loans in cells with n>=30):")
+    print(f"      {'grain':<10}{'cells':>7}{'coverage':>10}{'industry':>11}{'ext_cell':>11}")
+    for g in (2, 3, 4, 6):
+        r = naics_grain(d, g)
+        print(f"      {str(g)+'-digit':<10}{r['industry']['cells']:>7,}"
+              f"{100*r['ext_cell']['coverage']:>9.1f}%"
+              f"{100*r['industry']['var_share']:>10.2f}%{100*r['ext_cell']['var_share']:>10.2f}%")
+    print("      Industry quadruples from 2- to 6-digit and the external cell nearly doubles, so")
+    print("      the headline 1.53% is a floor set by the coarsest grain. At 6-digit the external")
+    print("      cell removes 2.97% -- on the 20% of loans whose cells are large enough to")
+    print("      estimate. 97% is still within-cell.")
 
     # [C12] Franchising: how much of the cohort is NOT an independent owner-operator.
     g = d.groupby("franchise").y.agg(["size","mean"])

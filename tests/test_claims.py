@@ -68,20 +68,26 @@ def test_L7_dispersion_is_three_times_larger_on_loans_that_changed_hands(old):
 
 @need
 @slow
-def test_L8_on_never_sold_loans_the_holder_effect_ranks_below_the_controls(old):
-    """The original claim was that holder identity beat industry, geography and
-    vintage combined. On loans that never changed hands it ranks 6th of 8."""
+def test_L8_the_never_sold_split_survives_loan_weighting(old):
+    """An earlier version ranked holder 6th of 8 by UNWEIGHTED fixed-effect sd and
+    called that an inversion. Unweighted sd is not comparable across factors with
+    different level counts; weighted, holder ranks 3rd. The claim was withdrawn.
+    What this pins is that [L7] -- one factor against itself across two subsamples
+    -- survives the correction and in fact strengthens."""
+    import numpy as np
     from src.lender import backfit, CONTROLS
-    sub = lender.prep(old)
-    sub = sub[~sub.sold]
-    eff, _, _, _ = backfit(sub, CONTROLS + ["BankName"])
-    c = sub.groupby("BankName").size(); k = c[c >= 500].index
-    sds = sorted(((f, (eff[f].loc[k] if f == "BankName" else eff[f]).std())
-                  for f in CONTROLS + ["BankName"]), key=lambda r: -r[1])
-    names = [f for f, _ in sds]
-    assert names.index("BankName") >= 4, f"holder ranked {names.index('BankName')+1}: {names}"
-    for beats in ["sector", "term_b", "age", "BorrState"]:
-        assert names.index(beats) < names.index("BankName"), f"{beats} should outrank holder"
+    d = lender.prep(old)
+    out = {}
+    for lbl, sub in [("never", d[~d.sold]), ("sold", d[d.sold])]:
+        eff, _, _, _ = backfit(sub, CONTROLS + ["BankName"])
+        c = sub.groupby("BankName").size(); k = c[c >= 500].index
+        e = eff["BankName"].loc[k]
+        w = sub[sub.BankName.isin(k)].groupby("BankName").size().reindex(e.index).fillna(0)
+        mu = (e * w).sum() / w.sum()
+        out[lbl] = float(np.sqrt((w * (e - mu) ** 2).sum() / w.sum()))
+    ratio = out["sold"] / out["never"]
+    assert ratio > 2.5, f"loan-weighted sold/never ratio {ratio:.2f} should exceed unweighted 2.69"
+    assert out["never"] < 0.05 and out["sold"] > 0.09
 
 
 @need

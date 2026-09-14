@@ -27,9 +27,10 @@ accessed 7 September 2026):
 stamped retroactively across sixteen years of bank mergers, bank failures, and secondary-market
 sales. It is not a lender identifier at all. It is an ownership snapshot.
 
-## Five checks
+## Four checks
 
-I did not want this to be true, so I tried to establish it five independent ways.
+I did not want this to be true, so I tried to establish it four independent ways. A fifth is
+recorded below as a withdrawal, because the reason it failed is itself instructive.
 
 **`[L4]` Holders carry loans that predate their own existence.** If the field recorded who *made*
 the loan, this would be impossible.

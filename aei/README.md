@@ -24,6 +24,7 @@ resolve**, so a partial run cannot be mistaken for a complete one.
 | Appendix B, placebo over all 36 pairs, April and May gaps, bootstrap | `aei_liability.py` | `P.*`, `M.*`, `B.*` |
 | Appendix B, Figure B1, automation share against checkability | `aei_figure1.py` | writes `output/figure1_threshold.png` |
 | Appendix C, charge-off concentration and AUC | `sba_discrimination.py`, `sba_7a_mix.py` | — |
+| This map and the paper's own cross-references | `check_crossrefs.py` | exits 2 on a stale pointer |
 
 Table 1 and the barrier rankings in Section 2 are quoted from the published Credit Survey
 and Census BTOS reports. They are not recomputed here and have no script.
@@ -43,6 +44,12 @@ python3 aei/power.py
 
 `power.py` needs no external data: it reads the 7(a) panels in `data/` through
 `src/build.py`. The two `sba_*.py` scripts want the raw FOIA extract via `SBA_CSV`.
+
+`check_crossrefs.py` reads the built paper, recovers the structure it actually has, and fails if
+any reference here or in the paper points at a section, table or figure that does not exist, or if
+a row above names a section that does not discuss its subject. It exists because that failure
+shipped: this map sent readers to Section 5 for the checkability coefficients after that section
+was folded into Section 4.
 
 `aei_liability.py` and `aei_paper.py` use `scipy` only for the Welch test; without it those
 two tags report as skipped and the run exits 2. Everything else, including the OLS with

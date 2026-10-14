@@ -91,7 +91,22 @@ src/reassignment.py  measures holder churn against an Internet Archive snapshot
 src/figures.py       the two figures above
 tests/               re-derives every [Cn]/[Ln]/[Bn]/[V1] tag
 traps/               the four failure modes, in prose
+aei/                 replication for the Economic Index paper (see below)
 ```
+
+## The Economic Index paper
+
+`aei/` holds the replication material for *Liability Exposure and Task Delegation: What Usage
+Data Can and Cannot Say About Small-Business AI Adoption*, which asks which operational tasks
+users hand to a language model outright and what predicts that choice. It uses the Anthropic
+Economic Index rather than this loan file, but the two meet in the paper's Section 6: the trial
+it costs out would run on the 7(a) greenfield cohort, and the cohort size, charge-off rate and
+break-even thresholds come from `src/` here, so the paper and `FINDINGS.md` agree by construction.
+
+[`aei/README.md`](aei/README.md) maps every table and figure in the paper to the script that
+produces it. Each script prints its figures against the tag used in the paper's prose and exits
+non-zero if any tag fails to resolve. `aei/power.py` needs no external data and runs against the
+panels in `data/`; the rest need the Index extract, which is not redistributed here.
 
 ## Honest limitations
 

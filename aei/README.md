@@ -17,8 +17,8 @@ resolve**, so a partial run cannot be mistaken for a complete one.
 | Table 3, liability and difficulty across the full taxonomy | `aei_liability.py` | `G.*` strict headline, `K.*` broad robustness, `E.*` difficulty |
 | Table 4, sample required to detect a reduction in failures | `power.py` | `W.*` |
 | Section 4, artifact-composition and strict-coding checks | `aei_liability.py` | `C.*`, `K.*` |
-| Section 5, checkability coefficients and the 6,435-partition placebo | `aei_paper.py` | `T2.*`, `L.*`, `X.*`, `D.*` |
-| Section 5, artifact-based recode against the keyword coding | `aei_verifiability.py` | — |
+| Section 4 and Appendix B, checkability coefficients and the 6,435-partition placebo | `aei_paper.py` | `T2.*`, `L.*`, `X.*`, `D.*` |
+| Appendix B, artifact-based recode against the keyword coding | `aei_verifiability.py` | — |
 | Appendix A, the strict and broad codings and the topics each flags | `aei_liability.py` | `K.n_flagged`, `K.broad_only_n` |
 | Appendix B, Table B1, the gap under alternative samples | `aei_liability.py` | `R.*` |
 | Appendix B, placebo over all 36 pairs, April and May gaps, bootstrap | `aei_liability.py` | `P.*`, `M.*`, `B.*` |
@@ -50,7 +50,7 @@ heteroskedasticity-robust standard errors, is pure Python.
 
 ## Two windows on the 7(a) cohort
 
-Section 7 of the paper uses the greenfield cohort, meaning 7(a) loans under $150,000 to
+Section 6 of the paper uses the greenfield cohort, meaning 7(a) loans under $150,000 to
 businesses less than two years old, through two different windows, and `power.py` keeps
 them apart deliberately:
 

@@ -141,31 +141,46 @@ bs.sort()
 tag("B.lo", bs[int(.025*len(bs))], "{:.1f}"); tag("B.hi", bs[int(.975*len(bs))-1], "{:.1f}")
 tag("B.nonpos", sum(1 for g in bs if g <= 0), "{:.0f}")
 
-# ---------------------------------------------------------------- Table 3
-print("\n## Table 3: liability coefficient across the full taxonomy")
+# ---------------------------------------------------------------- Table 4
+# The strict coding is the headline; the broad rule is reported as a robustness check.
+print("\n## Table 4: liability and difficulty across the full taxonomy")
 rows = []
 for n, d in REQ[MAY].items():
     y = d.get('collaboration_bucket_automation_pct')
     w = d.get('use_case_work_pct'); e = d.get('human_education_years_mean')
     if y is None or w is None or e is None: continue
-    rows.append(dict(n=n, y=y, w=w, edu=e, L=float(bool(re.search(LIAB_RE, n, re.I)))))
+    rows.append(dict(n=n, y=y, w=w, edu=e,
+                     L=float(bool(re.search(LIAB_STRICT, n, re.I))),
+                     Lb=float(bool(re.search(LIAB_RE, n, re.I)))))
 work = [r for r in rows if r['w'] > 80]
 tag("G.sample_n", len(rows), "{:.0f}")
 tag("G.liab_topics", sum(r['L'] for r in rows), "{:.0f}")
+tag("G.broad_topics", sum(r['Lb'] for r in rows), "{:.0f}")
 tag("G.work_n", len(work), "{:.0f}")
 tag("G.work_mean", st.mean(r['y'] for r in work), "{:.0f}")
 
-for key, sample, ctrl in (("all", rows, ['L']), ("allw", rows, ['L','w']),
-                          ("allwe", rows, ['L','w','edu']),
-                          ("w80", work, ['L']), ("w80e", work, ['L','edu'])):
-    res = ols(sample, ctrl)
-    if res is None: skip(f"G.{key}_b", "singular design"); continue
-    beta, se, r2, n = res
-    i = ctrl.index('L') + 1
-    print(f"   {key:<7} b {beta[i]:7.2f}  se {se[i]:5.2f}  t {beta[i]/se[i]:6.2f}  n {n:5d}  R2 {r2:.3f}")
-    tag(f"G.{key}_b", beta[i]); tag(f"G.{key}_se", se[i]); tag(f"G.{key}_t", beta[i]/se[i])
-    tag(f"G.{key}_n", n, "{:.0f}"); tag(f"G.{key}_r2", r2, "{:.3f}")
+SPEC = (("all",   None,  ['{L}']),
+        ("allw",  None,  ['{L}','w']),
+        ("allwe", None,  ['{L}','w','edu']),
+        ("w80",   "work",['{L}']),
+        ("w80e",  "work",['{L}','edu']))
 
+def run(prefix, var):
+    for key, samp, ctrl in SPEC:
+        sample = work if samp == "work" else rows
+        names = [c.format(L=var) for c in ctrl]
+        res = ols(sample, names)
+        if res is None: skip(f"{prefix}.{key}_b", "singular design"); continue
+        beta, se, r2, n = res
+        i = names.index(var) + 1
+        print(f"   {prefix} {key:<7} b {beta[i]:7.2f}  se {se[i]:5.2f}  t {beta[i]/se[i]:6.2f}  n {n:5d}  R2 {r2:.3f}")
+        tag(f"{prefix}.{key}_b", beta[i]); tag(f"{prefix}.{key}_se", se[i])
+        tag(f"{prefix}.{key}_t", beta[i]/se[i]); tag(f"{prefix}.{key}_n", n, "{:.0f}")
+        tag(f"{prefix}.{key}_r2", r2, "{:.3f}")
+
+run("G", "L")     # headline: strict coding, 45 topics
+print()
+run("K", "Lb")    # robustness: broad coding, 78 topics
 
 # ---------------------------------------------------------------- horse race
 print("\n## Does task difficulty predict delegation? (education coefficient)")
@@ -231,22 +246,11 @@ for t in TABLE1:
         line += f"{v:>10.1f}%"
     print(line + ("  <- liability" if t in LIABILITY else ""))
 
-print("\n## Strict coding: only terms carrying plain legal, tax or regulatory consequence")
-for r in rows: r['Ls'] = float(bool(re.search(LIAB_STRICT, r['n'], re.I)))
-strict_work = [r for r in rows if r['w'] > 80]
-tag("K.strict_n", sum(r['Ls'] for r in rows), "{:.0f}")
-for key, sample, ctrl in (("all", rows, ['Ls']), ("allwe", rows, ['Ls','w','edu']),
-                          ("w80", strict_work, ['Ls']), ("w80e", strict_work, ['Ls','edu'])):
-    res = ols(sample, ctrl)
-    if res is None: skip(f"K.{key}_b", "singular design"); continue
-    beta, se, r2, n = res
-    i = ctrl.index('Ls') + 1
-    print(f"   strict {key:<8} b {beta[i]:7.2f}  t {beta[i]/se[i]:6.2f}  n {n:5d}")
-    tag(f"K.{key}_b", beta[i]); tag(f"K.{key}_t", beta[i]/se[i]); tag(f"K.{key}_n", n, "{:.0f}")
-
-print("\n## Topics flagged by the liability rule")
+print("\n## Topics flagged by the headline (strict) rule")
 flagged = sorted(r['n'] for r in rows if r['L'])
 tag("K.n_flagged", len(flagged), "{:.0f}")
+broad_only = sorted(r['n'] for r in rows if r['Lb'] and not r['L'])
+tag("K.broad_only_n", len(broad_only), "{:.0f}")
 for i in range(0, len(flagged), 3):
     print("   " + "; ".join(flagged[i:i+3]))
 

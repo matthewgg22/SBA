@@ -12,13 +12,14 @@ resolve**, so a partial run cannot be mistaken for a complete one.
 | Paper element | Script | Tags |
 |---|---|---|
 | Table 2, operational tasks by liability exposure | `aei_paper.py` | `T1.*` |
-| Table 3, collaboration modes underneath the automation share | `aei_liability.py` | `S.*` |
-| Table 4, liability and difficulty across the full taxonomy | `aei_liability.py` | `G.*`, `E.*` |
-| Table 5, sample required to detect a reduction in failures | `power.py` | `W.*` |
+| Figure 1, how the nine tasks are worked | `aei_figure_modes.py` | writes `output/figure_modes.png` |
+| Appendix B, Table B2, collaboration modes | `aei_liability.py` | `S.*` |
+| Table 3, liability and difficulty across the full taxonomy | `aei_liability.py` | `G.*` strict headline, `K.*` broad robustness, `E.*` difficulty |
+| Table 4, sample required to detect a reduction in failures | `power.py` | `W.*` |
 | Section 4, artifact-composition and strict-coding checks | `aei_liability.py` | `C.*`, `K.*` |
 | Section 5, checkability coefficients and the 6,435-partition placebo | `aei_paper.py` | `T2.*`, `L.*`, `X.*`, `D.*` |
 | Section 5, artifact-based recode against the keyword coding | `aei_verifiability.py` | — |
-| Appendix A, the liability coding and the 78 flagged topics | `aei_liability.py` | `K.n_flagged` |
+| Appendix A, the strict and broad codings and the topics each flags | `aei_liability.py` | `K.n_flagged`, `K.broad_only_n` |
 | Appendix B, Table B1, the gap under alternative samples | `aei_liability.py` | `R.*` |
 | Appendix B, placebo over all 36 pairs, April and May gaps, bootstrap | `aei_liability.py` | `P.*`, `M.*`, `B.*` |
 | Appendix B, Figure B1, automation share against checkability | `aei_figure1.py` | writes `output/figure1_threshold.png` |
@@ -36,6 +37,7 @@ the release of June 26, 2026:
 AEI_CSV=/path/to/aei_claude_ai_2026-06-26.csv python3 aei/aei_paper.py
 AEI_CSV=/path/to/aei_claude_ai_2026-06-26.csv python3 aei/aei_liability.py
 AEI_CSV=/path/to/aei_claude_ai_2026-06-26.csv python3 aei/aei_figure1.py
+AEI_CSV=/path/to/aei_claude_ai_2026-06-26.csv python3 aei/aei_figure_modes.py
 python3 aei/power.py
 ```
 

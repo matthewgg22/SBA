@@ -66,7 +66,7 @@ ax.annotate("step at ~0.55", xy=(0.55, 41.2), xytext=(0.585, 41.2),
             fontsize=8, color="#666666", va="center")
 ax.set_xlabel("Checkability of the task's output\n"
               "0 = output can only be judged          1 = output can be checked", linespacing=1.5)
-ax.set_ylabel("Delegation share (%)")
+ax.set_ylabel("Automation share (%)")
 ax.set_xlim(-0.03, 1.03); ax.set_ylim(39.5, 69)
 ax.set_yticks([45, 50, 55, 60, 65])
 ax.grid(axis="y", color="#E6E6E6", linewidth=0.7)

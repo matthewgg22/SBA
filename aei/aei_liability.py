@@ -219,6 +219,10 @@ for key, sample, ctrl in (("bare", ck, ['L']), ("ck", ck, ['L','av']),
     print(f"   {key:<10} L {beta[i]:7.2f}  t {beta[i]/se[i]:6.2f}  n {n:5d}  R2 {r2:.3f}")
     tag(f"C.{key}_b", beta[i]); tag(f"C.{key}_se", se[i]); tag(f"C.{key}_t", beta[i]/se[i])
     tag(f"C.{key}_n", n, "{:.0f}"); tag(f"C.{key}_r2", r2, "{:.3f}")
+    for other in ('av', 'edu'):
+        if other in ctrl:
+            j = ctrl.index(other) + 1
+            tag(f"C.{key}_{other}_b", beta[j]); tag(f"C.{key}_{other}_t", beta[j]/se[j])
 
 print("\n## Standardized coefficients, full specification")
 res = ols(ck, ['L','av','w','edu'])

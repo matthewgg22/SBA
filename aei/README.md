@@ -11,11 +11,11 @@ resolve**, so a partial run cannot be mistaken for a complete one.
 
 | Paper element | Script | Tags |
 |---|---|---|
-| Table 2, operational tasks by liability exposure | `aei_paper.py` | `T1.*` |
+| Table 3, operational tasks by liability exposure | `aei_paper.py` | `T1.*` |
 | Figure 1, how the nine tasks are worked | `aei_figure_modes.py` | writes `output/figure_modes.png` |
 | Appendix B, Table B2, collaboration modes | `aei_liability.py` | `S.*` |
-| Table 3, liability and difficulty across the full taxonomy | `aei_liability.py` | `G.*` strict headline, `K.*` broad robustness, `E.*` difficulty |
-| Table 4, sample required to detect a reduction in failures | `power.py` | `W.*` |
+| Table 4, liability and difficulty across the full taxonomy | `aei_liability.py` | `G.*` strict headline, `K.*` broad robustness, `E.*` difficulty |
+| Table 5, sample required to detect a reduction in failures | `power.py` | `W.*` |
 | Section 4, artifact-composition and strict-coding checks | `aei_liability.py` | `C.*`, `K.*` |
 | Section 4 and Appendix B, checkability coefficients and the 6,435-partition placebo | `aei_paper.py` | `T2.*`, `L.*`, `X.*`, `D.*` |
 | Appendix B, artifact-based recode against the keyword coding | `aei_verifiability.py` | — |
@@ -26,7 +26,7 @@ resolve**, so a partial run cannot be mistaken for a complete one.
 | Appendix C, charge-off concentration and AUC | `sba_discrimination.py`, `sba_7a_mix.py` | — |
 | This map and the paper's own cross-references | `check_crossrefs.py` | exits 2 on a stale pointer |
 
-Table 1 and the barrier rankings in Section 2 are quoted from the published Credit Survey
+Tables 1 and 2 are the survey estimates and the definitions; the barrier rankings in Section 2 are quoted from the published Credit Survey
 and Census BTOS reports. They are not recomputed here and have no script.
 
 ## Running it

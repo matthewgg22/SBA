@@ -98,6 +98,10 @@ def spans(txt):
     return out
 
 BODY = spans(text)
+# captions, so a map row naming a table can be checked against what that table is
+# keyed by kind as well as number: Table B1 and Figure B1 both exist
+CAPTIONS = {(m.group(1), m.group(2)): m.group(3).lower()
+            for m in re.finditer(r"(?m)^(Table|Figure) (B?\d+)\. (.+)$", text)}
 
 def check_subject(where, body):
     for line in body.splitlines():
@@ -105,7 +109,8 @@ def check_subject(where, body):
             continue
         cell = line.split("|")[1].strip()
         refs = re.findall(r"\b(?:Section (\d{1,2})|Appendix ([A-C]))\b", cell)
-        if not refs:
+        caps = re.findall(r"\b(Table|Figure) (B?\d+)\b", cell)
+        if not refs and not caps:
             continue
         desc = re.sub(r"\b(?:Section \d{1,2}|Appendix [A-C]|Table B?\d+|Figure B?\d+)\b", " ", cell)
         words = {w for w in re.findall(r"[a-z]{6,}", desc.lower()) if w not in STOP}
@@ -119,6 +124,15 @@ def check_subject(where, body):
             if not any(w in span for w in words):
                 fails.append(f"{where}: row names {'Section' if sec else 'Appendix'} {key} "
                              f"but none of {sorted(words)[:4]} appears there")
+        # A table reference is tighter than a section one: the caption is short and
+        # specific, so a row naming the wrong table almost never overlaps its caption.
+        for kind, t in caps:
+            cap = CAPTIONS.get((kind, t))
+            if cap is None:
+                continue
+            if not any(w in cap for w in words):
+                fails.append(f"{where}: row names {kind} {t}, captioned "
+                             f"\u201c{cap[:44]}\u201d, but claims {sorted(words)[:4]}")
 
 def check_prose(where, body):
     # Paragraph scope, not sentence: a reference often sits mid-sentence with the
